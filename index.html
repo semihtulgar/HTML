@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<meta charset="utf-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+		crossorigin="anonymous"></script>
+
+
+</head>
+
+<body>
+
+	<div class="container">
+
+		<div class="row">
+			<div class="col-md-6 offset-md-3 mt-3">
+				<!-- Button trigger modal -->
+				<button id="btnNewProduct" type="button" class="btn btn-primary" data-bs-target="#myModal">
+					Yeni Ürün
+				</button>
+
+			</div>
+		</div>
+		<div class="row">
+
+			<div class="col-md-6 offset-md-3 mt-3">
+				<table id="productTable" class="table">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Name</th>
+							<th>Price</th>
+							<th>Color</th>
+							<th>isPublish</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+
+					</tbody>
+
+
+				</table>
+			</div>
+
+
+
+
+		</div>
+
+
+
+	</div>
+
+	<!-- Modal -->
+	<div id="myModal" class="modal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form action="">
+						<input type="hidden" id="id">
+
+
+						<select id="selectUsers" class="form-select">
+
+						</select>
+						<div class="mb-3">
+							<label for="name" class="form-label">Name</label>
+							<input type="text" class="form-control" id="name">
+
+						</div>
+
+
+						<div class="mb-3">
+							<label for="price" class="form-label">Price</label>
+							<input type="text" class="form-control" id="price">
+
+						</div>
+
+						<div class="mb-3">
+							<label for="color" class="form-label">Color</label>
+							<input type="text" class="form-control" id="color">
+
+						</div>
+						<div class="mb-3 form-check">
+							<input type="checkbox" class="form-check-input" id="isPublish">
+							<label class="form-check-label" for="exampleCheck1">Yayınlansın mı ?</label>
+						</div>
+
+
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button class="btn btn-primary" type="button" id="btnProductSaveOrUpdate">Kaydet</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script>
+	$(document).ready(function () {
+
+		const myModal = new bootstrap.Modal('#myModal', {
+			keyboard: false,
+		})
+
+
+		$("#btnNewProduct").click(function () {
+			loadDropdownListWithUserList();
+
+
+
+		})
+		var table = $("#productTable tbody");
+
+		var productList = [{ name: "kalem 1", price: 100, color: 'red', isPublish: true, id: 10 }];
+
+		insertRow(productList[0]);
+		var isUpdateStatus = false;
+		var btnSaveOrUpdate = $("#btnProductSaveOrUpdate");
+
+		function insertRow(product) {
+			table.append(`<tr>
+				<td>${product.id}</td>
+				<td>${product.name}</td>
+				<td>${product.price}</td>
+				<td>${product.color}</td>
+			
+				<td><input type="checkbox" class="form-check-input" disabled ${product.isPublish ? 'checked' : ''}></td>
+				<td>
+					<button class="btn btn-danger btn-sm remove"  data-id='${product.id}' >Sil</button>
+					<button class="btn btn-success btn-sm update"  data-id='${product.id}' >Güncelle</button>
+					
+					</td>
+				</tr>`)
+		}
+		$(document).on("click", ".remove", function () {
+			const swalWithBootstrapButtons = Swal.mixin({
+				customClass: {
+					confirmButton: 'btn btn-success',
+					cancelButton: 'btn btn-danger'
+				},
+				buttonsStyling: false
+			})
+			swalWithBootstrapButtons.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Yes, delete it!',
+				cancelButtonText: 'No, cancel!',
+				reverseButtons: true
+			}).then((result) => {
+				if (result.isConfirmed) {
+
+					table.empty();
+					var id = $(this).attr("data-id");
+					productList = productList.filter(x => x.id != id);
+
+					productList.forEach(x => {
+						insertRow(x);
+					})
+
+
+
+
+					swalWithBootstrapButtons.fire(
+						'Deleted!',
+						'Your file has been deleted.',
+						'success'
+					)
+				} else if (
+					/* Read more about handling dismissals below */
+					result.dismiss === Swal.DismissReason.cancel
+				) {
+					swalWithBootstrapButtons.fire(
+						'Cancelled',
+						'Your imaginary file is safe :)',
+						'error'
+					)
+				}
+			})
+
+
+
+
+		});
+		$(document).on("click", ".update", function () {
+
+			var id = $(this).attr("data-id");
+			var updateProduct = productList.find(x => x.id == id);
+
+			$("#name").val(updateProduct.name);
+			$("#price").val(updateProduct.price);
+			$("#color").val(updateProduct.color);
+			$("#id").val(updateProduct.id);
+			$('#isPublish').prop('checked', updateProduct.isPublish);
+			isUpdateStatus = true;
+
+			btnSaveOrUpdate.text("Güncelle");
+
+			myModal.show();
+
+
+		})
+		btnSaveOrUpdate.click(function () {
+			const name = $("#name").val();
+			const price = $("#price").val();
+			const color = $("#color").val();
+			const isPublish = $("#isPublish").is(":checked")
+			const id = $("#id").val();
+
+
+			if (isUpdateStatus) {
+
+				let rowIndex = productList.findIndex(x => x.id == id);
+				productList[rowIndex].name = name;
+				productList[rowIndex].price = price;
+				productList[rowIndex].color = color;
+				productList[rowIndex].isPublish = isPublish;
+				table.empty();
+				productList.forEach(x => insertRow(x));
+				btnSaveOrUpdate.text("Kaydet");
+				isUpdateStatus = false;
+			}
+			else {
+				do {
+					newId = Math.floor(Math.random() * 100);
+				} while (productList.some(x => x.id == newId))
+
+				const newProduct = { id: newId, name: name, price: price, color: color, isPublish: isPublish }
+				productList.push(newProduct);
+				insertRow(newProduct);
+			}
+			$("form").trigger("reset");
+			myModal.hide();
+
+
+
+
+
+
+		});
+
+
+		function loadDropdownListWithUserList() {
+			$.ajax({
+				method: "Get",
+				url: "https://jsonplaceholder.typicode.com/users",
+				success: function (data) {
+
+					console.log(data);
+					myModal.show();
+					const select = $("#selectUsers");
+					select.empty();
+					data.forEach(x => {
+						select.append(` <option value="${x.id}">${x.username}</option>`)
+					})
+
+				},
+				error: function () { },
+				complete: function () { }
+
+
+
+			})
+
+
+		}
+
+
+	});
+
+</script>
+
+</html>
